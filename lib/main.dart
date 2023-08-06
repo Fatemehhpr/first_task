@@ -1,11 +1,17 @@
+// ignore_for_file: use_key_in_widget_constructors
+
 import 'package:flutter/material.dart';
+import '../widgets/textField.dart';
+import '../widgets/textButton.dart';
+import '../data.dart';
+import '../informationScreen.dart';
 
 void main() {
   runApp(const MyApp());
 }
 
 class MyApp extends StatelessWidget {
-
+  
   const MyApp({super.key});
 
   // This widget is the root of your application.
@@ -14,21 +20,6 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       title: 'Flutter Demo',
       theme: ThemeData(
-        // This is the theme of your application.
-        //
-        // TRY THIS: Try running your application with "flutter run". You'll see
-        // the application has a blue toolbar. Then, without quitting the app,
-        // try changing the seedColor in the colorScheme below to Colors.green
-        // and then invoke "hot reload" (save your changes or press the "hot
-        // reload" button in a Flutter-supported IDE, or press "r" if you used
-        // the command line to start the app).
-        //
-        // Notice that the counter didn't reset back to zero; the application
-        // state is not lost during the reload. To reset the state, use hot
-        // restart instead.
-        //
-        // This works for code too, not just values: Most code changes can be
-        // tested with just a hot reload.
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.yellow.shade700),
         useMaterial3: true,
       ),
@@ -37,7 +28,19 @@ class MyApp extends StatelessWidget {
   }
 }
 
-class MyHomePage extends StatelessWidget{
+class MyHomePage extends StatefulWidget{
+  const MyHomePage({Key? key}) : super(key: key);
+
+  @override
+  State<MyHomePage> createState() => _MyHomePageState();
+}
+
+class _MyHomePageState extends State<MyHomePage> {
+  TextEditingController userNameController = TextEditingController();
+  TextEditingController passwordController = TextEditingController();
+
+  final formKey = GlobalKey<FormState>();
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -81,7 +84,7 @@ class MyHomePage extends StatelessWidget{
                         ),
                       ],
                     ),
-                    height: 570,
+                    height: 610,
                     width: 280,
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
@@ -99,89 +102,72 @@ class MyHomePage extends StatelessWidget{
                         SizedBox(
                           height: 32,
                         ),
-                        TextField(
-                          decoration: InputDecoration(
-                            floatingLabelBehavior: FloatingLabelBehavior.always,
-                            labelText: 'Username',
-                            labelStyle: TextStyle(
-                              fontWeight: FontWeight.w600,
-                              color: Colors.black
-                            ),
-                            hintText: 'Your Name',
-                            hintStyle: TextStyle(
-                              color: Colors.grey
-                            ),
-                            enabledBorder: OutlineInputBorder(
-                              borderSide: BorderSide(
-                                width: 1,
-                                color: Colors.orange,
-                              )
-                            ),
-                          ),
-                          style: TextStyle(
-                            fontSize: 12,
-                            height: 0.5,
-                          ),
-                        ),
-                        SizedBox(
-                          height: 14,
-                        ),
-                        TextField(
-                          decoration: const InputDecoration(
-                            floatingLabelBehavior: FloatingLabelBehavior.always,
-                            labelText: 'Password',
-                            labelStyle: TextStyle(
-                              fontWeight: FontWeight.w600,
-                              color: Colors.black
-                            ),
-                            hintText: 'Password',
-                            hintStyle: TextStyle(color: Colors.grey),
-                            enabledBorder: OutlineInputBorder(
-                              borderSide: BorderSide(
-                                width: 1,
-                                color: Colors.orange,
-                              )
-                            ),
-                            
-                          ),
-                          style: TextStyle(
-                            fontSize: 12,
-                            height: 0.5,
-                            color: Colors.black
-                          ),
-                        ),
-                        Padding(
-                          padding: EdgeInsets.fromLTRB(55, 20, 45, 10),
-                          child: ElevatedButton(
-                            onPressed: () {},
-                            child: Text('LOGIN'),
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor: Colors.yellow.shade700,
-                              foregroundColor: Colors.white,
-                              shadowColor: Colors.yellow.shade500,
-                              elevation: 6,
-                              textStyle: TextStyle(
-                                fontSize: 12,
-                                fontWeight: FontWeight.w700
+                        Form(
+                          key: formKey,
+                          child: Column(
+                            children: [
+                              textFieldWidget(
+                                lableText: 'Username', 
+                                hintText: 'Your Name',
+                                controller: userNameController,
                               ),
-                              minimumSize: Size(120, 35),
-                            )
-                          ),
+                              SizedBox(
+                                height: 14,
+                              ),
+                              textFieldWidget(
+                                lableText: 'Password',
+                                hintText: 'Password',
+                                controller: passwordController,
+                              ),
+                              Padding(
+                                padding: EdgeInsets.fromLTRB(55, 20, 45, 10),
+                                child: FutureBuilder(
+                                  future: APIHandler.getUser(),
+                                  builder: (context, snapshot) {
+                                    return ElevatedButton(
+                                      child: Text('LOGIN'),
+                                      style: ElevatedButton.styleFrom(
+                                        backgroundColor: Colors.yellow.shade700,
+                                        foregroundColor: Colors.white,
+                                        shadowColor: Colors.yellow.shade500,
+                                        elevation: 6,
+                                        textStyle: TextStyle(
+                                          fontSize: 12,
+                                          fontWeight: FontWeight.w700
+                                        ),
+                                        minimumSize: Size(120, 35),
+                                      ),
+                                      onPressed: () {
+                                        //APIHandler.getUser();
+                                        //print("response ${APIHandler.getUser()}");
+                                        if (formKey.currentState!.validate()) {
+                                          if (snapshot.hasData && snapshot.data != null) {
+                                            for (var i = 0; i < snapshot.data!.length; i++) {
+                                              if (snapshot.data![i].username == userNameController.text && snapshot.data![i].password == passwordController.text) {
+                                                Navigator.of(context).push(
+                                                  MaterialPageRoute(builder: (context) => UserDataForm(data: snapshot.data![i]))
+                                                );
+                                                break;
+                                              }
+                                              if ((i == snapshot.data!.length - 1) && (snapshot.data![i].username != userNameController.text || snapshot.data![i].password != passwordController.text)) {
+                                                ScaffoldMessenger.of(context).showSnackBar(
+                                                  const SnackBar(content: Text('you have never signed up'))
+                                                );
+                                              }
+                                            }
+                                          }
+                                        };
+                                      }
+                                    );
+                                  },
+                                )
+                              ),
+                            ],
+                          )
                         ),
                         Padding(
                           padding: const EdgeInsets.fromLTRB(75, 8, 55, 0),
-                          child: TextButton(
-                                  onPressed: () {},
-                                  child: Text('Forget Password?'),
-                                  style: TextButton.styleFrom(
-                                    padding: EdgeInsets.all(2),
-                                    textStyle: TextStyle(
-                                      fontWeight: FontWeight.w400,
-                                      fontSize: 10
-                                    ),
-                                    primary: Colors.black,
-                                  ),
-                              ),
+                          child: textButtonWidget(color: Colors.black, text:'Forget Password?',),
                         ),
                         Padding(
                           padding: const EdgeInsets.fromLTRB(27, 15, 0, 5),
@@ -194,18 +180,7 @@ class MyHomePage extends StatelessWidget{
                                 fontSize: 10
                                 ),
                               ),
-                              TextButton(
-                                onPressed: () {},
-                                child: Text('Create Account'),
-                                style: TextButton.styleFrom(
-                                  padding: EdgeInsets.all(2),
-                                  textStyle: TextStyle(
-                                    fontWeight: FontWeight.w400,
-                                    fontSize: 10
-                                  ),
-                                  primary: Colors.yellow.shade700
-                                ),
-                              ),
+                              textButtonWidget(color: Colors.yellow.shade700, text:'Create Account',),
                         
                             ],
                           ),
@@ -238,4 +213,10 @@ class MyHomePage extends StatelessWidget{
     );
   }
 }
+
+
+
+
+
+
 
