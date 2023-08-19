@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import '../widgets/text.dart';
+import '../../widgets/text.dart';
 
 class UserDataForm extends StatelessWidget {
   final data;
@@ -8,6 +8,7 @@ class UserDataForm extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      appBar: AppBar(),
       body: Stack(
         children: [
           Positioned(
@@ -67,7 +68,7 @@ class UserDataForm extends StatelessWidget {
           Align(
             alignment: AlignmentDirectional.topStart,
               child: Padding(
-                padding: const EdgeInsets.fromLTRB(24, 200, 0, 0),
+                padding: const EdgeInsets.fromLTRB(24, 100, 0, 0),
                 child: Text(
                   'Profile',
                   style: TextStyle(

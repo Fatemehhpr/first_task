@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
+import 'package:provider/provider.dart';
 
 class User {
   Address? address;
@@ -35,11 +36,11 @@ class User {
     v = json['__v'];
   }
 
-  static List<User> userFromSnapshot(List userSnapshot) {
+  /*static List<User> userFromSnapshot(List userSnapshot) {
     return userSnapshot.map((data) {
       return User.fromJson(data);
     }).toList();
-  }
+  }*/
 }
 
 class Address {
@@ -96,7 +97,25 @@ class Name {
   }
 }
 
-class APIHandler {
+class Images {
+  int albumId = 1;
+  int id = 1;
+  String title = "accusamus beatae ad facilis cum similique qui sunt";
+  String url = "https://via.placeholder.com/600/92c952";
+  String thumbnailUrl = "https://via.placeholder.com/150/92c952";
+
+  Images({required this.albumId, required this.id, required this.title, required this.url, required this.thumbnailUrl});
+
+  Images.fromJson(Map<String, dynamic> json) {
+    albumId = json['albumId'];
+    id = json['id'];
+    title = json['title'];
+    url = json['url'];
+    thumbnailUrl = json['thumbnailUrl'];
+  }
+}
+
+/*class APIHandler {
   static Future<List<User>> getUser() async {
     var response = await http.get(Uri.parse("http://fakestoreapi.com/users"));
 
@@ -108,16 +127,16 @@ class APIHandler {
     }
     return User.userFromSnapshot(usersData);
   }
-}
+}*/
 
-/*class HttpClient{
+class HttpClient{
   static Dio instance=Dio(BaseOptions(
-    baseUrl: 'http://fakestoreapi.com/'
+    //baseUrl: 'http://'
   ));
 }
 
 Future<List<User>> getUser() async{
-  final response= await HttpClient.instance.get('users');
+  final response= await HttpClient.instance.get('http://fakestoreapi.com/users');
   final List<User> users=[];
   if (response.data is List<dynamic>){
     for (var element in (response.data as List<dynamic>)) { 
@@ -125,5 +144,15 @@ Future<List<User>> getUser() async{
     }
   }
   return users;
-}*/
+}
 
+Future<List<Images>> getPhoto() async{
+  final response= await HttpClient.instance.get('http://jsonplaceholder.typicode.com/photos');
+  final List<Images> images=[];
+  if (response.data is List<dynamic>){
+    for (var element in (response.data as List<dynamic>)) { 
+      images.add(Images.fromJson(element));
+    }
+  }
+  return images;
+}
